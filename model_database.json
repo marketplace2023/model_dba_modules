@@ -1,0 +1,631 @@
+1. Módulo de Gestión de Usuarios y Roles
+¿Por qué primero?
+Este módulo es esencial para crear cuentas de administradores y empleados, definiendo quién tendrá acceso al sistema y qué permisos tendrán.
+Flujo: Registro de restaurante > Creación de roles (administrador, gerente).
+2. Módulo de Perfiles de Restaurantes
+¿Por qué segundo?
+Antes de gestionar reservas, los restaurantes deben configurar su información básica (nombre, horarios, ubicación, tipo de cocina, menús, etc.).
+Flujo: Configuración del perfil completo del restaurante.
+3. Módulo de Gestión de Mesas
+¿Por qué aquí?
+Después de configurar el perfil, el restaurante debe definir su capacidad y disposición de mesas, para habilitar el sistema de reservas.
+Flujo: Configuración de mesas > Definición de horarios de disponibilidad.
+4. Módulo de Gestión de Reservas
+¿Por qué ahora?
+Con el perfil y la disposición de mesas listos, los restaurantes pueden empezar a recibir y gestionar reservas.
+Flujo: Visualización de reservas > Confirmación/Modificación > Listas de espera.
+5. Módulo de Comunicación con Clientes
+¿Por qué aquí?
+Una vez activas las reservas, la comunicación con los clientes es clave para confirmar detalles, enviar recordatorios y atender consultas.
+Flujo: Chat con clientes > Notificaciones automáticas (reservas y recordatorios).
+6. Módulo de Promociones
+¿Por qué en este punto?
+Una vez que el sistema básico de reservas está funcionando, los restaurantes pueden crear promociones para atraer más clientes.
+Flujo: Configuración de ofertas > Publicación y seguimiento de resultados.
+7. Módulo de Opiniones y Valoraciones
+¿Por qué después?
+Las opiniones llegan una vez que los clientes han utilizado el servicio, por lo que este módulo cobra relevancia tras haber procesado varias reservas.
+Flujo: Visualización de valoraciones > Respuesta a comentarios.
+8. Módulo de Estadísticas y Reportes
+¿Por qué aquí?
+Este módulo analiza datos acumulados, como reservas realizadas, ocupación, impacto de promociones y comentarios, lo que requiere que el sistema haya estado funcionando por un tiempo.
+Flujo: Análisis de datos > Generación de reportes > Optimización de estrategias.
+9. Módulo de Integración con Pagos
+¿Por qué después?
+Aunque puede implementarse antes si es necesario, en general, las pasarelas de pago son útiles para reservas avanzadas, eventos especiales o políticas de depósito.
+Flujo: Configuración de pasarelas > Recepción de depósitos/pagos > Gestión de reembolsos.
+10. Módulo de Integraciones Externas
+¿Por qué al final?
+Este módulo puede implementarse en cualquier momento, pero generalmente se agrega una vez que el sistema básico funciona bien y el restaurante busca expandir su alcance o funcionalidades (como delivery o promociones automáticas en redes sociales).
+Flujo: Conexión con sistemas externos > Sincronización de datos.
+11. Módulo de Soporte Técnico
+¿Por qué aquí?
+Este módulo debe estar disponible desde el principio en una forma básica, pero se puede expandir con funciones avanzadas una vez que haya más usuarios y posibles incidencias.
+Flujo: Resolución de incidencias > Soporte en tiempo real > Base de conocimientos.
+
+CREATE TABLE restaurantes (
+    id_restaurante INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    direccion VARCHAR(500) NOT NULL,
+    descripcion TEXT,
+    foto_portada BLOB,
+    foto_perfil BLOB,
+    politicas_reservas TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE horarios (
+    id_horario INT AUTO_INCREMENT PRIMARY KEY,
+    id_restaurante INT,
+    dia_semana ENUM('lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo') NOT NULL,
+    hora_apertura TIME NOT NULL,
+    hora_cierre TIME NOT NULL,
+    FOREIGN KEY (id_restaurante) REFERENCES restaurantes(id_restaurante)
+);
+CREATE TABLE platos (
+    id_plato INT AUTO_INCREMENT PRIMARY KEY,
+    id_restaurante INT,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10,
+2) NOT NULL,
+    foto BLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_restaurante) REFERENCES restaurantes(id_restaurante)
+);
+CREATE TABLE categorias_platos (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+CREATE TABLE platos_categorias (
+    id_plato INT,
+    id_categoria INT,
+    PRIMARY KEY (id_plato, id_categoria),
+    FOREIGN KEY (id_plato) REFERENCES platos(id_plato),
+    FOREIGN KEY (id_categoria) REFERENCES categorias_platos(id_categoria)
+);
+
+Gestión de Información del Restaurante
+function actualizarInformacionRestaurante():
+    mostrarFormulario("Información del Restaurante")
+    leerDatosFormulario():
+        nombre = leerCampo("Nombre")
+        direccion = leerCampo("Dirección")
+        descripcion = leerCampo("Descripción")
+        fotoPortada = leerArchivo("Foto Portada")
+        fotoPerfil = leerArchivo("Foto Perfil")
+        politicasReservas = leerCampo("Políticas de Reservas")
+    
+    actualizarEnBaseDeDatos("restaurantes",
+{
+    "nombre": nombre,
+    "direccion": direccion,
+    "descripcion": descripcion,
+    "foto_portada": fotoPortada,
+    "foto_perfil": fotoPerfil,
+    "politicas_reservas": politicasReservas
+})
+    
+    mostrarMensaje("Información del restaurante actualizada correctamente.")
+
+Menú y Precios
+function gestionarMenu():
+    mostrarOpciones("Gestión de Menú"):
+        case "Agregar Plato":
+            agregarPlato()
+        case "Modificar Plato":
+            seleccionarPlatoParaModificar()
+            modificarPlato()
+        case "Eliminar Plato":
+            seleccionarPlatoParaEliminar()
+            eliminarPlato()
+        default:
+            mostrarMenu()
+
+function agregarPlato():
+    mostrarFormulario("Agregar Plato")
+    leerDatosFormulario():
+        nombre = leerCampo("Nombre")
+        descripcion = leerCampo("Descripción")
+        precio = leerCampo("Precio")
+        foto = leerArchivo("Foto")
+        idRestaurante = obtenerIdRestauranteActual()
+    
+    insertarEnBaseDeDatos("platos",
+{
+    "id_restaurante": idRestaurante,
+    "nombre": nombre,
+    "descripcion": descripcion,
+    "precio": precio,
+    "foto": foto
+})
+    
+    mostrarMensaje("Plato agregado correctamente.")
+
+function modificarPlato():
+    idPlato = seleccionarPlato()
+    mostrarFormulario("Modificar Plato", obtenerDetallesPlato(idPlato))
+    leerDatosFormulario():
+        nombre = leerCampo("Nombre")
+        descripcion = leerCampo("Descripción")
+        precio = leerCampo("Precio")
+        foto = leerArchivo("Foto")
+    
+    actualizarEnBaseDeDatos("platos",
+{
+    "id_plato": idPlato,
+    "nombre": nombre,
+    "descripcion": descripcion,
+    "precio": precio,
+    "foto": foto
+})
+    
+    mostrarMensaje("Plato modificado correctamente.")
+
+function eliminarPlato():
+    idPlato = seleccionarPlato()
+    confirmarAccion("¿Estás seguro de que quieres eliminar este plato?")
+    if (confirmacion):
+        eliminarDeBaseDeDatos("platos",
+"id_plato =", idPlato)
+        mostrarMensaje("Plato eliminado correctamente.")
+
+Funciones Auxiliares
+function obtenerIdRestauranteActual():
+// Lógica para obtener el ID del restaurante actual
+    return idRestaurante
+
+function seleccionarPlato():
+// Lógica para seleccionar un plato desde la lista
+    return idDelPlatoSeleccionado
+
+function obtenerDetallesPlato(idPlato):
+// Lógica para obtener los detalles de un plato por su ID
+    return detallesDelPlato
+
+
+CREATE TABLE reservas (
+    id_reserva INT AUTO_INCREMENT PRIMARY KEY,
+    id_restaurante INT,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    num_personas INT NOT NULL,
+    nombre_cliente VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    telefono VARCHAR(20),
+    estado ENUM('pendiente', 'confirmada', 'rechazada') DEFAULT 'pendiente',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_restaurante) REFERENCES restaurantes(id_restaurante)
+);
+
+CREATE TABLE listas_espera (
+    id_lista_espera INT AUTO_INCREMENT PRIMARY KEY,
+    id_restaurante INT,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    nombre_cliente VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    telefono VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_restaurante) REFERENCES restaurantes(id_restaurante)
+);
+
+CREATE TABLE notificaciones (
+    id_notificacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_reserva INT,
+    id_lista_espera INT,
+    tipo ENUM('confirmacion', 'actualizacion', 'liberacion_mesa') NOT NULL,
+    mensaje TEXT NOT NULL,
+    enviado BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_reserva) REFERENCES reservas(id_reserva),
+    FOREIGN KEY (id_lista_espera) REFERENCES listas_espera(id_lista_espera)
+);
+
+Calendario de Reservas
+function mostrarCalendarioDeReservas(fecha):
+    reservasDelDia = obtenerReservasPorFecha(fecha)
+    mostrarReservasEnCalendario(reservasDelDia)
+
+
+Confirmación y Gestión de Reservas
+function gestionarReserva(idReserva, accion):
+    reserva = obtenerReservaPorId(idReserva)
+    if (accion == "confirmar"):
+        actualizarEstadoReserva(reserva,
+"confirmada")
+    elif (accion == "rechazar"):
+        actualizarEstadoReserva(reserva,
+"rechazada")
+    elif (accion == "modificar"):
+        mostrarFormularioModificarReserva(reserva)
+        nuevaInformacion = leerNuevaInformacionReserva()
+        actualizarReserva(reserva, nuevaInformacion)
+    enviarNotificacionACliente(reserva, accion)
+
+Listas de Espera
+function gestionarListaEspera(fecha, hora):
+    clientesEnEspera = obtenerClientesEnListaEspera(fecha, hora)
+    if (hayMesaDisponible()):
+        clienteSiguiente = clientesEnEspera[
+    0
+]
+        moverDeEsperaAReserva(clienteSiguiente, fecha, hora)
+        enviarNotificacionDeLiberacionMesa(clienteSiguiente)
+        eliminarDelListaEspera(clienteSiguiente)
+    else:
+        mostrarMensajes("No hay mesas disponibles en este momento.")
+
+Funciones Auxiliares
+function obtenerReservasPorFecha(fecha):
+// Lógica para obtener todas las reservas para una fecha específica
+    return reservas
+
+function obtenerReservaPorId(idReserva):
+// Lógica para obtener una reserva por su ID
+    return reserva
+
+function actualizarEstadoReserva(reserva, nuevoEstado):
+// Lógica para actualizar el estado de una reserva
+    reserva.estado = nuevoEstado
+    guardarCambiosEnReserva(reserva)
+
+function mostrarFormularioModificarReserva(reserva):
+// Lógica para mostrar un formulario con los detalles actuales de la reserva y permitir modificaciones
+    pass
+
+function leerNuevaInformacionReserva():
+// Lógica para leer la nueva información ingresada por el usuario para modificar la reserva
+    return nuevaInformacion
+
+function actualizarReserva(reserva, nuevaInformacion):
+// Lógica para actualizar los detalles de una reserva con la nueva información
+    for (clave, valor) in nuevaInformacion:
+        reserva[clave
+] = valor
+    guardarCambiosEnReserva(reserva)
+
+function enviarNotificacionACliente(reserva, accion):
+// Lógica para enviar una notificación al cliente según la acción realizada
+    pass
+
+function obtenerClientesEnListaEspera(fecha, hora):
+// Lógica para obtener todos los clientes en la lista de espera para una fecha y hora específicas
+    return clientesEnEspera
+
+function hayMesaDisponible():
+// Lógica para verificar si hay mesas disponibles para la fecha y hora especificadas
+    return hayDisponibilidad
+
+function moverDeEsperaAReserva(cliente, fecha, hora):
+// Lógica para mover a un cliente de la lista de espera a una reserva
+    reservaNueva = crearNuevaReserva(cliente, fecha, hora)
+    guardarReserva(reservaNueva)
+    eliminarDelListaEspera(cliente)
+
+function enviarNotificacionDeLiberacionMesa(cliente):
+// Lógica para enviar una notificación al cliente indicando que se ha liberado una mesa
+    pass
+
+function eliminarDelListaEspera(cliente):
+// Lógica para eliminar a un cliente de la lista de espera
+    pass
+
+function guardarCambiosEnReserva(reserva):
+// Lógica para guardar los cambios realizados en una reserva en la base de datos
+    pass
+
+function guardarReserva(reserva):
+// Lógica para guardar una nueva reserva en la base de datos
+    pass
+
+Architectura Model Diagram (Modules Model) 
+=====================================
+Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── Teléfono
+   ├── Correo Electrónico
+   ├── Fecha_Registro
+   ├── Estado
+
+Rol
+   ├── ID_Rol (PK)
+   ├── Nombre
+   ├── Descripción
+
+Usuario
+   ├── ID_Usuario (PK)
+   ├── Nombre
+   ├── Apellido
+   ├── Correo Electrónico (único)
+   ├── Contraseña (encriptada)
+   ├── Teléfono (opcional)
+   ├── Estado (activo/inactivo)
+   ├── Fecha_Creación
+   ├── Último_Inicio_Sesión
+   ├── ID_Rol (FK → Rol)
+   ├── ID_Restaurante (FK → Restaurante)
+
+Permiso
+   ├── ID_Permiso (PK)
+   ├── Nombre_Permiso
+   ├── Descripción
+
+Rol_Permiso
+   ├── ID_Rol (FK → Rol)
+   ├── ID_Permiso (FK → Permiso)
+
+//////////////////////////////////////////////////////////////////////////
+
+
+   Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── Teléfono
+   ├── Correo Electrónico
+   ├── Descripción
+   ├── Tipo_Cocina
+   ├── Horario_Apertura
+   ├── Horario_Cierre
+   ├── Estado (activo/inactivo)
+   ├── Fecha_Registro
+
+Zona
+   ├── ID_Zona (PK)
+   ├── ID_Restaurante (FK → Restaurante)
+   ├── Nombre_Zona
+   ├── Capacidad_Maxima
+   ├── Descripción (opcional)
+
+Menú
+   ├── ID_Menú (PK)
+   ├── ID_Restaurante (FK → Restaurante)
+   ├── Nombre
+   ├── Descripción
+   ├── Fecha_Creación
+
+Plato
+   ├── ID_Plato (PK)
+   ├── ID_Menú (FK → Menú)
+   ├── Nombre
+   ├── Descripción
+   ├── Precio
+   ├── Estado (activo/inactivo)
+   ├── Imagen (opcional)
+
+Ubicación
+   ├── ID_Ubicación (PK)
+   ├── ID_Restaurante (FK → Restaurante)
+   ├── Latitud //////
+   ├── Longitud //////
+   ├── Dirección_Detallada (opcional)
+
+Categorías (opcional)
+   ├── ID_Categoría (PK)
+   ├── Nombre_Categoría
+   ├── Descripción
+   ├── ID_Restaurante (FK → Restaurante)
+
+Zona
+   ├── ID_Zona (PK)
+   ├── ID_Restaurante (FK)
+   ├── Nombre_Zona
+   ├── Capacidad_Maxima
+   ├── Descripción
+
+Mesa
+   ├── ID_Mesa (PK)
+   ├── ID_Zona (FK → Zona)
+   ├── Capacidad
+   ├── Estado (activo/inactivo)
+   ├── Descripción
+
+Disponibilidad_Mesa
+   ├── ID_Disponibilidad (PK)
+   ├── ID_Mesa (FK → Mesa)
+   ├── Fecha
+   ├── Horario_Inicio
+   ├── Horario_Fin
+   ├── Estado (disponible/reservada)
+
+   Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── ...
+
+Mesa
+   ├── ID_Mesa (PK)
+   ├── ID_Zona (FK)
+   ├── ...
+
+Reserva
+   ├── ID_Reserva (PK)
+   ├── ID_Restaurante (FK)
+   ├── ID_Mesa (FK)
+   ├── Nombre_Cliente
+   ├── Teléfono_Cliente
+   ├── Fecha_Reserva
+   ├── Horario_Inicio
+   ├── Horario_Fin
+   ├── Número_Personas
+   ├── Estado
+
+Lista_Espera
+   ├── ID_Espera (PK)
+   ├── ID_Restaurante (FK)
+   ├── Nombre_Cliente
+   ├── Teléfono_Cliente
+   ├── Fecha_Solicitada
+   ├── Horario_Solicitado
+   ├── Número_Personas
+   ├── Estado
+
+Historial_Reserva
+   ├── ID_Historial (PK)
+   ├── ID_Reserva (FK)
+   ├── Fecha_Modificación
+   ├── Acción
+   ├── Detalles_Cambio
+
+
+   Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── ...
+
+Cliente
+   ├── ID_Cliente (PK)
+   ├── Nombre
+   ├── Teléfono
+   ├── Correo Electrónico
+
+Reserva
+   ├── ID_Reserva (PK)
+   ├── ID_Cliente (FK)
+   ├── Fecha_Reserva
+   ├── Estado
+
+Mensaje_Chat
+   ├── ID_Mensaje (PK)
+   ├── ID_Restaurante (FK)
+   ├── ID_Cliente (FK)
+   ├── Fecha_Envío
+   ├── Tipo (entrada/salida)
+   ├── Contenido
+   ├── Leído
+
+Notificación
+   ├── ID_Notificación (PK)
+   ├── ID_Restaurante (FK)
+   ├── ID_Cliente (FK)
+   ├── Tipo (reserva confirmada, recordatorio, cancelación)
+   ├── Contenido
+   ├── Fecha_Envío
+   ├── Estado (enviada, pendiente)
+
+
+   Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── ...
+
+Promoción
+   ├── ID_Promoción (PK)
+   ├── ID_Restaurante (FK)
+   ├── Nombre_Promoción
+   ├── Descripción
+   ├── Tipo_Promoción
+   ├── Fecha_Inicio
+   ├── Fecha_Fin
+   ├── Estado
+
+Condición_Promoción
+   ├── ID_Condición (PK)
+   ├── ID_Promoción (FK)
+   ├── Tipo_Condición
+   ├── Valor_Condición
+
+Resultado_Promoción
+   ├── ID_Resultado (PK)
+   ├── ID_Promoción (FK)
+   ├── Número_Reservas
+   ├── Número_Personas
+   ├── Ingresos_Aplicados
+   ├── Feedback_Cliente
+
+Cliente
+   ├── ID_Cliente (PK)
+   ├── Nombre
+   ├── Teléfono
+   ├── Correo Electrónico
+
+Reserva
+   ├── ID_Reserva (PK)
+   ├── ID_Cliente (FK)
+   ├── ID_Restaurante (FK)
+   ├── ID_Promoción (FK)
+   ├── Fecha_Reserva
+   ├── Estado
+
+   Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── Teléfono
+   ├── Correo Electrónico
+
+Cliente
+   ├── ID_Cliente (PK)
+   ├── Nombre
+   ├── Teléfono
+   ├── Correo Electrónico
+
+Reserva
+   ├── ID_Reserva (PK)
+   ├── ID_Cliente (FK)
+   ├── ID_Restaurante (FK)
+   ├── Fecha_Reserva
+   ├── Estado
+
+Opinión
+   ├── ID_Opinión (PK)
+   ├── ID_Restaurante (FK)
+   ├── ID_Cliente (FK)
+   ├── ID_Reserva (FK)
+   ├── Fecha_Opinión
+   ├── Comentario
+   ├── Puntuación
+   ├── Estado
+
+Respuesta_Restaurante
+   ├── ID_Respuesta (PK)
+   ├── ID_Opinión (FK)
+   ├── ID_Restaurante (FK)
+   ├── Fecha_Respuesta
+   ├── Respuesta
+
+
+   Restaurante
+   ├── ID_Restaurante (PK)
+   ├── Nombre
+   ├── Dirección
+   ├── Teléfono
+   ├── Correo Electrónico
+
+Cliente
+   ├── ID_Cliente (PK)
+   ├── Nombre
+   ├── Teléfono
+   ├── Correo Electrónico
+
+Pregunta
+   ├── ID_Pregunta (PK)
+   ├── ID_Cliente (FK)
+   ├── ID_Restaurante (FK)
+   ├── Pregunta
+   ├── Fecha_Pregunta
+   ├── Estado
+
+Respuesta
+   ├── ID_Respuesta (PK)
+   ├── ID_Pregunta (FK)
+   ├── ID_Restaurante (FK)
+   ├── Respuesta
+   ├── Fecha_Respuesta
+
+Categoría_Pregunta
+   ├── ID_Categoría (PK)
+   ├── Nombre_Categoría
+
+Pregunta_Categoría
+   ├── ID_Pregunta (FK)
+   ├── ID_Categoría (FK)

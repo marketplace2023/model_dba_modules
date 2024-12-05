@@ -1,0 +1,853 @@
+////// Model Definition for Users Module////////
+
+<model name="res.user">
+    <field name="name" required="1" />
+    <field name="last_name" />
+    <field name="email" required="1" widget="email" />
+    <field name="password" password="1" />
+    <field name="date_of_birth" />
+    <field name="street" />
+    <field name="street2" />
+    <field name="city" />
+    <field name="zip" />
+    <field name="country_id" />
+    <field name="phone" />
+    <field name="user_type_id" domain="[('category', '=', 'base.group_user')]" />
+    <field name="state" selection="[('active', 'Active'), ('inactive', 'Inactive')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.user.profile">
+    <field name="name" />
+    <field name="last_name" />
+    <field name="email" />
+    <field name="street" />
+    <field name="street2" />
+    <field name="city" />
+    <field name="zip" />
+    <field name="country_id" />
+    <field name="phone" />
+    <field name="create_date" />
+    <field name="write_date" />
+    <field name="user_id" required="1" ondelete="cascade" />
+</model>
+
+<model name="res.role">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.permission">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="role_id" required="1" ondelete="cascade" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Authentication Module ////////
+
+<model name="res.session">
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="token" required="1" />
+    <field name="start_date" />
+    <field name="end_date" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.authentication">
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="token" required="1" />
+    <field name="start_date" />
+    <field name="end_date" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Products Module////////
+
+<model name="product.product">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="list_price" required="1" />
+    <field name="categ_id" domain="[('type', '=', 'product')]" required="1" />
+    <field name="image" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('available', 'Available'), ('discontinued', 'Discontinued')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="product.category">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="product.subcategory">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="product_id" required="1" ondelete="cascade" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="product.inventory">
+    <field name="product_id" required="1" ondelete="cascade" />
+    <field name="quantity_available" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="shopping.cart">
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="product_id" required="1" ondelete="cascade" />
+    <field name="quantity" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="sale.order.line">
+    <field name="order_id" required="1" ondelete="cascade" />
+    <field name="product_id" required="1" ondelete="cascade" />
+    <field name="product_uom_qty" required="1" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('sent', 'Sent'), ('sale', 'Sold'), ('done', 'Done'), ('cancel', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="date_begin" required="1" />
+    <field name="date_end" required="1" />
+    <field name="location" />
+    <field name="max_participants" />
+    <field name="image" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('open', 'Open'), ('done', 'Done'), ('cancel', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.ticket">
+    <field name="event_id" required="1" ondelete="cascade" />
+    <field name="user_id" required="1" ondelete="set null" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('confirmed', 'Confirmed'), ('used', 'Used'), ('refunded', 'Refunded')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Sales Order Module /////////////////
+
+<model name="sale.order">
+    <field name="name" required="1" />
+    <field name="partner_id" required="1" />
+    <field name="order_line" nolabel="1" colspan="2" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('sent', 'Sent'), ('sale', 'Sold'), ('done', 'Done'), ('cancel', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="sale.order.line">
+    <field name="order_id" required="1" ondelete="cascade" />
+    <field name="product_id" required="1" domain="[('sale_ok', '=', True)]" />
+    <field name="product_uom_qty" required="1" />
+    <field name="price_unit" />
+    <field name="tax_id" domain="[('type_tax_use', '=', 'sale')]" />
+    <field name="discount" />
+    <field name="state" related="order_id.state" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.invoice">
+    <field name="number" required="1" />
+    <field name="partner_id" required="1" />
+    <field name="invoice_line_ids" nolabel="1" colspan="2" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('open', 'Open'), ('paid', 'Paid'), ('cancel', 'Cancelled')]" />
+    <field name="date_invoice" required="1" />
+    <field name="residual" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.payment">
+    <field name="name" required="1" />
+    <field name="journal_id" domain="[('type', '=', 'bank')]" required="1" />
+    <field name="partner_id" required="1" />
+    <field name="amount" required="1" />
+    <field name="payment_method_id" domain="[('is_payment_method', '=', True)]" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('posted', 'Posted'), ('rejected', 'Rejected')]" />
+    <field name="date" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="sale.discount">
+    <field name="name" required="1" />
+    <field name="order_id" required="1" ondelete="cascade" />
+    <field name="amount" />
+    <field name="discount_type"
+        selection="[('percentage', 'Percentage'), ('fixed', 'Fixed Amount')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.tax">
+    <field name="name" required="1" />
+    <field name="type_tax_use"
+        selection="[('sale', 'Sales'), ('purchase', 'Purchases'), ('none', 'None')]" />
+    <field name="amount" required="1" />
+    <field name="sequence" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Messages Module /////////////////
+
+<model name="mail.message">
+    <field name="res_model" />
+    <field name="res_id" />
+    <field name="subject" />
+    <field name="body" />
+    <field name="model" />
+    <field name="author_id" />
+    <field name="partner_ids" />
+    <field name="state" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="mail.mail">
+    <field name="res_model" />
+    <field name="res_id" />
+    <field name="subject" />
+    <field name="body_html" />
+    <field name="email_to" />
+    <field name="state" />
+    <field name="sent" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="sms.message">
+    <field name="partner_id" />
+    <field name="body" />
+    <field name="state" />
+    <field name="sent" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="mail.notification">
+    <field name="res_model" />
+    <field name="res_id" />
+    <field name="message_id" />
+    <field name="user_id" />
+    <field name="is_read" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Payment Module /////////////////
+
+<model name="payment.payment">
+    <field name="id" sequence="10" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="sale_order_id" domain="[('state', '=', 'draft')]" />
+    <field name="payment_method"
+        selection="[('credit_card', 'Tarjeta de Crédito'), ('paypal', 'PayPal'), ('cash', 'Efectivo')]" />
+    <field name="amount" />
+    <field name="state"
+        selection="[('pending', 'Pendiente'), ('processed', 'Procesado'), ('cancelled', 'Cancelado')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="payment.credit.card">
+    <field name="id" sequence="20" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="card_number" />
+    <field name="expiration_date" />
+    <field name="security_code" />
+    <field name="cardholder_name" />
+    <field name="card_type"
+        selection="[('visa', 'Visa'), ('mastercard', 'Mastercard'), ('amex', 'Amex')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="payment.paypal.account">
+    <field name="id" sequence="30" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="paypal_email" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="payment.cash">
+    <field name="id" sequence="40" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="amount" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="payment.transaction">
+    <field name="id" sequence="50" />
+    <field name="payment_id" required="1" ondelete="cascade" />
+    <field name="amount" />
+    <field name="state"
+        selection="[('pending', 'Pendiente'), ('processed', 'Procesado'), ('cancelled', 'Cancelado')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="payment.charge">
+    <field name="id" sequence="60" />
+    <field name="payment_id" required="1" ondelete="cascade" />
+    <field name="amount" />
+    <field name="state"
+        selection="[('pending', 'Pendiente'), ('processed', 'Procesado'), ('cancelled', 'Cancelado')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Ratings Module /////////////////
+
+<model name="rating.rating">
+    <field name="id" sequence="10" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="product_id" domain="[('type', '=', 'product')]" />
+    <field name="event_id" domain="[('type', '=', 'event')]" />
+    <field name="score" type="integer" options="{'min': 1, 'max': 5}" />
+    <field name="comment" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="rated_product">
+    <field name="average_rating" compute="_compute_average_rating" />
+    <field name="rating_count" compute="_compute_rating_count" />
+    <field name="last_rating_update" compute="_compute_last_rating_update" />
+
+    <store>
+        <record id="product_template_base" model="product.template">
+            <field name="average_rating" eval="0.0" />
+            <field name="rating_count" eval="0" />
+            <field name="last_rating_update" eval="False" />
+        </record>
+    </store>
+
+    <compute name="_compute_average_rating" string="Average Rating">
+        <value expr="eval('sum(rating.rating.score) / len(rating.rating)')" model="res.partner" />
+    </compute>
+
+    <compute name="_compute_rating_count" string="Rating Count">
+        <value expr="len(rating.rating)" />
+    </compute>
+
+    <compute name="_compute_last_rating_update" string="Last Rating Update">
+        <value expr="max(rating.rating.create_date)" />
+    </compute>
+</model>
+
+<model name="rated.event">
+    <field name="average_rating" compute="_compute_average_rating" />
+    <field name="rating_count" compute="_compute_rating_count" />
+    <field name="last_rating_update" compute="_compute_last_rating_update" />
+
+    <store>
+        <record id="event_template_base" model="event.template">
+            <field name="average_rating" eval="0.0" />
+            <field name="rating_count" eval="0" />
+            <field name="last_rating_update" eval="False" />
+        </record>
+    </store>
+
+    <compute name="_compute_average_rating" string="Average Rating">
+        <value expr="eval('sum(rating.rating.score) / len(rating.rating)')" model="res.partner" />
+    </compute>
+
+    <compute name="_compute_rating_count" string="Rating Count">
+        <value expr="len(rating.rating)" />
+    </compute>
+
+    <compute name="_compute_last_rating_update" string="Last Rating Update">
+        <value expr="max(rating.rating.create_date)" />
+    </compute>
+</model>
+
+<model name="product.rating">
+    <field name="id" sequence="20" />
+    <field name="rating_id" required="1" ondelete="cascade" />
+    <field name="product_id" required="1" ondelete="cascade" />
+    <field name="score" type="integer" options="{'min': 1, 'max': 5}" />
+    <field name="comment" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.rating">
+    <field name="id" sequence="30" />
+    <field name="rating_id" required="1" ondelete="cascade" />
+    <field name="event_id" required="1" ondelete="cascade" />
+    <field name="score" type="integer" options="{'min': 1, 'max': 5}" />
+    <field name="comment" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Promotions Module /////////////////
+
+<model name="promotion.promotion">
+    <field name="id" sequence="10" />
+    <field name="name" />
+    <field name="description" />
+    <field name="type" selection="[('discount', 'Descuento'), ('offer', 'Oferta')]" />
+    <field name="amount" />
+    <field name="valid_until" />
+    <field name="state" selection="[('active', 'Activa'), ('inactive', 'Inactiva')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="promotion.promoted_product">
+    <field name="id" sequence="20" />
+    <field name="promotion_id" required="1" ondelete="cascade" />
+    <field name="product_id" required="1" ondelete="cascade" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="promotion.promoted_event">
+    <field name="id" sequence="30" />
+    <field name="promotion_id" required="1" ondelete="cascade" />
+    <field name="event_id" required="1" ondelete="cascade" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="promotion.discount">
+    <field name="id" sequence="40" />
+    <field name="promotion_id" required="1" ondelete="cascade" />
+    <field name="amount" />
+    <field name="type" selection="[('product', 'Por Producto'), ('event', 'Por Evento')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="promotion.offer">
+    <field name="id" sequence="50" />
+    <field name="promotion_id" required="1" ondelete="cascade" />
+    <field name="product_id" />
+    <field name="event_id" />
+    <field name="price" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Shipment Module /////////////////
+
+<model name="shipment.shipment">
+    <field name="id" sequence="10" />
+    <field name="sale_order_id" domain="[('state', '=', 'done')]" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="shipping_address_id" required="1" ondelete="set null" />
+    <field name="shipping_method_id" required="1" ondelete="set null" />
+    <field name="state"
+        selection="[('pending', 'Pendiente'), ('in_transit', 'En camino'), ('delivered', 'Entregado')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="shipping.address">
+    <field name="id" sequence="20" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="street" />
+    <field name="city" />
+    <field name="zip" />
+    <field name="country_id" domain="[('state_ids', '!=', False)]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="shipping.method">
+    <field name="id" sequence="30" />
+    <field name="name" />
+    <field name="description" />
+    <field name="cost" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="shipment.tracking">
+    <field name="id" sequence="40" />
+    <field name="shipment_id" required="1" ondelete="cascade" />
+    <field name="state" selection="[('in_transit', 'En camino'), ('delivered', 'Entregado')]" />
+    <field name="update_date" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="delivery.delivery">
+    <field name="id" sequence="50" />
+    <field name="shipment_id" required="1" ondelete="cascade" />
+    <field name="user_id" required="1" ondelete="cascade" />
+    <field name="delivery_date" />
+    <field name="state"
+        selection="[('pending', 'Pendiente'), ('in_process', 'En proceso'), ('delivered', 'Entregado')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Inventory Module /////////////////
+
+<model name="stock.inventory">
+    <field name="product_id" required="1" domain="[('type', '=', 'product')]" />
+    <field name="quantity" required="1" />
+    <field name="date_update" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="product.product">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="list_price" required="1" />
+    <field name="categ_id" required="1" domain="[('type', '=', 'product')]" />
+    <field name="image" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('available', 'Available'), ('out_of_stock', 'Out of Stock')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="product.category">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="product.subcategory">
+    <field name="product_id" required="1" domain="[('type', '=', 'product')]" />
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="stock.inventory.line">
+    <field name="inventory_id" required="1" />
+    <field name="product_id" required="1" domain="[('type', '=', 'product')]" />
+    <field name="product_uom_id" required="1" />
+    <field name="quantity" required="1" />
+    <field name="date" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="stock.move">
+    <field name="origin" required="1" />
+    <field name="product_id" required="1" domain="[('type', '=', 'product')]" />
+    <field name="product_uom_id" required="1" />
+    <field name="quantity" required="1" />
+    <field name="date" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Invoice /////////////////
+
+<model name="account.invoice">
+    <field name="partner_id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="sale_order_id" domain="[('state', '=', 'done')]" />
+    <field name="date_invoice" required="1" />
+    <field name="amount_total" required="1" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('open', 'Open'), ('paid', 'Paid'), ('cancel', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.invoice.line">
+    <field name="invoice_id" required="1" />
+    <field name="product_id" required="1" domain="[('type', 'in', ['product', 'consu'])]" />
+    <field name="quantity" required="1" />
+    <field name="price_unit" required="1" />
+    <field name="price_subtotal" compute="_compute_price_subtotal" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.tax">
+    <field name="invoice_id" required="1" />
+    <field name="name" required="1" />
+    <field name="amount" required="1" />
+    <field name="type" selection="[('percent', 'Percentage'), ('fixed', 'Fixed Amount')]" />
+    <field name="sequence" default="10" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.invoice.discount">
+    <field name="invoice_id" required="1" />
+    <field name="amount" required="1" />
+    <field name="type" selection="[('percent', 'Percentage'), ('fixed', 'Fixed Amount')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="account.payment">
+    <field name="invoice_id" required="1" />
+    <field name="partner_id" required="1" />
+    <field name="journal_id" domain="[('type', '=', 'bank')]" required="1" />
+    <field name="amount" required="1" />
+    <field name="payment_method_id" domain="[('is_payment_method', '=', True)]" required="1" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('posted', 'Posted'), ('rejected', 'Rejected')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Reservations Module /////////////////
+
+<model name="res.reservation">
+    <field name="user_id" required="1" />
+    <field name="space_id" required="1" domain="[('state', '=', 'available')]" />
+    <field name="start_datetime" required="1" />
+    <field name="end_datetime" required="1" />
+    <field name="number_of_people" required="1" />
+    <field name="state"
+        selection="[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.space">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="type" selection="[('table', 'Table'), ('conference_room', 'Conference Room')]" />
+    <field name="capacity" required="1" />
+    <field name="state" selection="[('available', 'Available'), ('occupied', 'Occupied')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.space.schedule">
+    <field name="space_id" required="1" domain="[('state', '=', 'available')]" />
+    <field name="start_datetime" required="1" />
+    <field name="end_datetime" required="1" />
+    <field name="state" selection="[('available', 'Available'), ('occupied', 'Occupied')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.waiting.list">
+    <field name="reservation_id" required="1" />
+    <field name="space_id" required="1" />
+    <field name="wait_datetime" required="1" />
+    <field name="state"
+        selection="[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.reservation.confirmation">
+    <field name="reservation_id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="confirm_datetime" required="1" />
+    <field name="state"
+        selection="[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Events Module /////////////////
+
+<model name="event.event">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="date_start" required="1" />
+    <field name="date_end" required="1" />
+    <field name="location" />
+    <field name="capacity" required="1" />
+    <field name="image" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event.type">
+    <field name="name" required="1" />
+    <field name="description" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event.ticket">
+    <field name="event_id" required="1" />
+    <field name="ticket_type_id" required="1" />
+    <field name="price" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event.promotion">
+    <field name="event_id" required="1" />
+    <field name="discount" />
+    <field name="valid_until" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event.ticket.purchase">
+    <field name="event_ticket_id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="payment_method"
+        selection="[('credit_card', 'Credit Card'), ('paypal', 'PayPal'), ('cash', 'Cash')]" />
+    <field name="amount" required="1" />
+    <field name="state"
+        selection="[('pending', 'Pending'), ('processed', 'Processed'), ('cancelled', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Geolocation Module /////////////////
+
+<model name="res.location">
+    <field name="id" required="1" />
+    <field name="name" />
+    <field name="address" />
+    <field name="city" />
+    <field name="zip" />
+    <field name="country_id" />
+    <field name="latitude" />
+    <field name="longitude" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="restaurant.restaurant">
+    <field name="id" required="1" />
+    <field name="name" />
+    <field name="description" />
+    <field name="address" />
+    <field name="city" />
+    <field name="zip" />
+    <field name="country_id" />
+    <field name="latitude" />
+    <field name="longitude" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event">
+    <field name="id" required="1" />
+    <field name="name" />
+    <field name="description" />
+    <field name="date_start" required="1" />
+    <field name="date_end" required="1" />
+    <field name="location" />
+    <field name="capacity" required="1" />
+    <field name="image" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')]" />
+    <field name="latitude" />
+    <field name="longitude" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.map">
+    <field name="id" required="1" />
+    <field name="restaurant_id" required="1" />
+    <field name="event_id" required="1" />
+    <field name="latitude" />
+    <field name="longitude" />
+    <field name="zoom" />
+    <field name="markers" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="res.marker">
+    <field name="id" required="1" />
+    <field name="map_id" required="1" />
+    <field name="type" required="1" />
+    <field name="latitude" />
+    <field name="longitude" />
+    <field name="additional_info" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+////// Model Definition for Notifications Module /////////////////
+
+<model name="mail.notification">
+    <field name="id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="notification_type" />
+    <field name="content" />
+    <field name="state" selection="[('pending', 'Pending'), ('sent', 'Sent'), ('read', 'Read')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="mail.alert">
+    <field name="id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="alert_type" />
+    <field name="content" />
+    <field name="state" selection="[('pending', 'Pending'), ('sent', 'Sent'), ('read', 'Read')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="mail.reminder">
+    <field name="id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="reminder_type" />
+    <field name="content" />
+    <field name="state" selection="[('pending', 'Pending'), ('sent', 'Sent'), ('read', 'Read')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="event.event">
+    <field name="id" required="1" />
+    <field name="name" />
+    <field name="description" />
+    <field name="date_start" required="1" />
+    <field name="date_end" required="1" />
+    <field name="location" />
+    <field name="capacity" required="1" />
+    <field name="image" />
+    <field name="state"
+        selection="[('draft', 'Draft'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
+
+<model name="platform.platform">
+    <field name="id" required="1" />
+    <field name="name" />
+    <field name="description" />
+    <field name="state" selection="[('updated', 'Updated'), ('maintenance', 'Maintenance')]" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>

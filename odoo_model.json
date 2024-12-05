@@ -1,0 +1,52 @@
+Tabla: `res_users`
+Esta tabla almacena la información de los usuarios.
+
+Campo	Tipo de Dato	Descripción
+id	INT(11) UNSIGNED	Clave primaria, identificador único del usuario. Autoincremental.
+name	VARCHAR(256)	Nombre completo del usuario.
+login	VARCHAR(64)	Nombre de usuario para iniciar sesión. Debe ser único.
+password	VARCHAR(256)	Contraseña del usuario en formato hash.
+active	TINYINT(1)	Indica si el usuario está activo (1) o inactivo (0).
+company_id	INT(11) UNSIGNED	Identificador del ID de la compañía a la que pertenece el usuario. Relacionado con `res.company`.
+email	VARCHAR(256)	Dirección de correo electrónico del usuario.
+groups_id	MANY2MANY	Relación muchos a muchos con la tabla `res.groups` para asignar roles al usuario.
+
+Tabla: `res_groups`
+Esta tabla almacena la información de los grupos/roles.
+
+Campo	Tipo de Dato	Descripción
+id	INT(11) UNSIGNED	Clave primaria, identificador único del grupo. Autoincremental.
+name	VARCHAR(256)	Nombre del grupo/rol.
+model_access_ids	ONE2MANY	Relación uno a muchos con la tabla `ir.model.access` para definir los permisos del grupo.
+Tabla: `ir.model.access`
+Esta tabla almacena los permisos de acceso a los modelos de datos para cada grupo.
+
+Campo	Tipo de Dato	Descripción
+id	INT(11) UNSIGNED	Clave primaria, identificador único del registro de acceso. Autoincremental.
+group_id	INT(11) UNSIGNED	Identificador del grupo al que se aplica el permiso. Relacionado con `res.groups`.
+model	VARCHAR(256)	Nombre del modelo de datos al que se aplica el permiso.
+res_id	INT(11) UNSIGNED	Identificador del registro específico al que se aplica el permiso (opcional).
+imd_model	VARCHAR(256)	Nombre del modelo de datos del menú o vista (opcional).
+imd_name	VARCHAR(256)	Nombre del menú o vista (opcional).
+create	TINYINT(1)	Indica si el grupo puede crear registros en el modelo (1) o no (0).
+read	TINYINT(1)	Indica si el grupo puede leer registros en el modelo (1) o no (0).
+write	TINYINT(1)	Indica si el grupo puede escribir registros en el modelo (1) o no (0).
+unlink	TINYINT(1)	Indica si el grupo puede eliminar registros en el modelo (1) o no (0).
+
+Tabla: `restaurant.restaurant`
+Esta tabla almacena la información básica de cada restaurante.
+
+Campo	Tipo de Dato	Descripción
+id	INT(11) UNSIGNED	Clave primaria, identificador único del restaurante. Autoincremental.
+name	VARCHAR(256)	Nombre del restaurante.
+description	TEXT	Descripción detallada del restaurante, incluyendo su historia, especialidades, etc.
+address	VARCHAR(512)	Dirección física del restaurante.
+city	VARCHAR(128)	Ciudad donde se encuentra el restaurante.
+state_id	INT(11) UNSIGNED	Identificador del estado/provincia donde se encuentra el restaurante. Relacionado con `res.country.state`.
+country_id	INT(11) UNSIGNED	Identificador del país donde se encuentra el restaurante. Relacionado con `res.country`.
+zip	VARCHAR(24)	Código postal del restaurante.
+phone	VARCHAR(32)	Número de teléfono del restaurante.
+email	VARCHAR(256)	Dirección de correo electrónico del restaurante.
+website	VARCHAR(256)	Sitio web del restaurante.
+image	BLOB	Imagen del logotipo o foto representativa del restaurante.
+user_id	INT(11) UNSIGNED	Identificador del usuario de Odoo que gestiona el restaurante. Relacionado con `res.users`.
