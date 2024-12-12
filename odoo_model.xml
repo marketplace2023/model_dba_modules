@@ -851,3 +851,13 @@
     <field name="create_date" />
     <field name="write_date" />
 </model>
+
+////// Model Definition for Favorites Module /////////////////
+
+<model name="favorite.favorite">
+    <field name="id" required="1" />
+    <field name="user_id" required="1" />
+    <field name="event_id" required="1" />
+    <field name="create_date" />
+    <field name="write_date" />
+</model>
